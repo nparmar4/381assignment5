@@ -5,3 +5,4 @@ npm install react-dom
 npm install prettier
 npm install webpack webpack-cli
 pip install flask
+npm install axios
