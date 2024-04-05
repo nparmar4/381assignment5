@@ -99,13 +99,11 @@ def signup():
     for user in users:
         if user['username'] == username:
             return jsonify({'error': 'Username already exists'}), 400
-    
-    # Add new user
+    print(users)
     users.append({"username": username, "password": password, "email": email})
     print(users)
     return jsonify({'message': 'User signed up successfully!'}), 201
     
-
 # User authentication API endpoint
 @app.route('/login', methods=['POST'])
 def login():

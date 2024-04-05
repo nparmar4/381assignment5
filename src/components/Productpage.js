@@ -4,12 +4,15 @@ import ProductList from './ProductList';
 import Cart from './Cart';
 import Footer from './Footer';
 import axios from 'axios';
+import LoginForm from './LoginForm';
+import SignupForm from './SignupForm';
 
 const Productpage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [products, setProducts] = useState([]);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [showLoginForm, setShowLoginForm] = useState(true);
 
-  // Load cart items from localStorage on component mount
   useEffect(() => {
     const storedCartItems = localStorage.getItem('cartItems');
     if (storedCartItems) {
@@ -17,11 +20,11 @@ const Productpage = () => {
     }
   }, []);
 
-  // Fetch product data from the backend API endpoint on component mount
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/products'); 
+        const response = await axios.get('http://127.0.0.1:5000/products');
+        setProducts(response.data);
       } catch (error) {
         console.error('Error fetching product data:', error);
       }
@@ -30,48 +33,35 @@ const Productpage = () => {
     fetchProducts();
   }, []);
 
-  // Update cart items in localStorage whenever cartItems state changes
-  useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  const addToCart = (product) => {
-    const existingItemIndex = cartItems.findIndex((item) => item.id === product.id);
-    if (existingItemIndex !== -1) {
-      const updatedCartItems = [...cartItems];
-      updatedCartItems[existingItemIndex].quantity += 1;
-      setCartItems(updatedCartItems);
-    } else {
-      setCartItems([...cartItems, { ...product, quantity: 1 }]);
-    }
+  const handleLogin = () => {
+    switchForm();
   };
 
-  const removeFromCart = (productId) => {
-    const updatedCartItems = cartItems.map((item) => {
-      if (item.id === productId) {
-        if (item.quantity === 1) {
-          return null;
-        } else {
-          return { ...item, quantity: item.quantity - 1 };
-        }
-      }
-      return item;
-    }).filter((item) => item !== null); // Filter out null entries to remove removed items from cart
-
-    setCartItems(updatedCartItems);
+  const switchForm = () => {
+    setShowLoginForm(!showLoginForm);
   };
 
   return (
     <div>
       <Header />
-      <table>
-        <tbody>
-          <tr>
-            <td><ProductList products={products} onAddToCart={addToCart} /></td>
-            <td style={{ verticalAlign: 'top' }}><Cart cartItems={cartItems} onRemove={removeFromCart} /></td>
-          </tr>
-        </tbody>
-      </table>
+      {loggedIn ? (
+        <table>
+          <tbody>
+            <tr>
+              <td><ProductList products={products} /></td>
+              <td><Cart cartItems={cartItems} /></td>
+            </tr>
+          </tbody>
+        </table>
+      ) : (
+        <div>
+      {showLoginForm ? (
+        <LoginForm switchToSignup={switchForm} onLogin={handleLogin} />
+      ) : (
+        <SignupForm switchToLogin={switchForm} />
+      )}
+      </div>
+      )}
       <Footer />
     </div>
   );
