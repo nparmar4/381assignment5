@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import Header from './Header';
 import ProductList from './ProductList';
 import Cart from './Cart';
@@ -21,20 +20,24 @@ const Productpage = () => {
   }, []);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:5000/products');
-        setProducts(response.data);
-      } catch (error) {
+    fetch('http://127.0.0.1:5000/products')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setProducts(data);
+      })
+      .catch(error => {
         console.error('Error fetching product data:', error);
-      }
-    };
-
-    fetchProducts();
+      });
   }, []);
+  
 
   const handleLogin = () => {
-    setLoggedIn(true); // Set loggedIn state to true upon successful login
+    switchForm();
   };
 
   const switchForm = () => {
@@ -44,17 +47,7 @@ const Productpage = () => {
   return (
     <div>
       <Header />
-      {/* Check if user is logged in, if not, show login form */}
-      {!loggedIn ? (
-        <div>
-          {showLoginForm ? (
-            <LoginForm switchToSignup={switchForm} onLogin={handleLogin} />
-          ) : (
-            <SignupForm switchToLogin={switchForm} />
-          )}
-        </div>
-      ) : (
-        // If user is logged in, show product list and cart
+      {loggedIn ? (
         <table>
           <tbody>
             <tr>
@@ -63,10 +56,17 @@ const Productpage = () => {
             </tr>
           </tbody>
         </table>
+      ) : (
+        <div>
+      {showLoginForm ? (
+        <LoginForm switchToSignup={switchForm} onLogin={handleLogin} />
+      ) : (
+        <SignupForm switchToLogin={switchForm} />
+      )}
+      </div>
       )}
       <Footer />
     </div>
   );
 };
-
 export default Productpage;
