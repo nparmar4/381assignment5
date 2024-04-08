@@ -1,37 +1,43 @@
 // ProductList.js
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import Product from './Product';
 
-const ProductList = () => {
-  const [products, setProducts] = useState([]);
+const ProductList = ({ onAddToCart }) => {
+  const [productsData, setProductsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
-    // Fetch product data from the backend API endpoint
     const fetchProducts = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:5000/products'); 
-        setProducts(response.data); 
-      } 
-      catch (error) {
-        console.error('Error fetching product data:', error);
+      try{
+        const response = await fetch('http://127.0.0.1:5000/products');
+        if(!response.ok){
+          throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
+        setProductsData(data);
+        console.log(data);
+        setLoading(false);
+      } catch (error){
+        console.error('Error fetching products: ', error.message);
       }
     };
 
     fetchProducts();
-  }, []); // Empty dependency array to ensure the effect runs only once after component mount
+  }, []);
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
   return (
-    <div>
-      <h2>Product List</h2>
-      <ul>
-        {products.map(product => (
-          <li key={product.id}>
-            <strong>{product.name}</strong> - {product.description}
-          </li>
-        ))}
-      </ul>
+    <div className="product-list">
+      {productsData.map(product => (
+        <Product key={product.id} product={product} onAddToCart={onAddToCart} />
+      ))}
     </div>
   );
+
 };
 
 export default ProductList;

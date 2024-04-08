@@ -1,31 +1,23 @@
-import React, { useState } from 'react';
-import Header from './Header';
-import LoginForm from './LoginForm';
-import Footer from './Footer';
-import SignupForm from './SignupForm'; 
+import React, {useState, useContext} from 'react';
+import Header from './Header.js';
+import LoginForm from './LoginForm.js';
+import SignupForm from './SignupForm.js';
+import Footer from './Footer.js';
 
-const LoginPage = () => {
-  const [showLoginForm, setShowLoginForm] = useState(true);
+function LoginPage(){
+    const [toggle, setToggle] = useState(true);
 
-  const switchForm = () => {
-    setShowLoginForm(!showLoginForm);
-  };
 
-  const handleLogin = () => {
-    switchForm();
-  };
+    return(
 
-  return (
-    <div>
-      <Header />
-      {showLoginForm ? (
-        <LoginForm switchToSignup={switchForm} onLogin={handleLogin} />
-      ) : (
-        <SignupForm switchToLogin={switchForm} />
-      )}
-      <Footer />
-    </div>
-  );
-};
+        <div>
+            <Header />
+            {toggle ? <LoginForm toggle={toggle} setToggle={setToggle}/>
+            : <SignupForm toggle={toggle} setToggle={setToggle}/>
+            }
+            <Footer />
+        </div>
+    )
+}
 
 export default LoginPage;

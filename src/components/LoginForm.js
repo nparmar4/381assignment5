@@ -1,83 +1,98 @@
-// LoginForm.js
-import React, { useState } from "react";
-import SignupForm from "./SignupForm.js";
-import { useNavigate } from "react-router-dom";
+import React, {useState, useEffect, useContext} from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export function useLoginStatus() {
-  const [loginStatus, setLoginStatus] = useState(
-    localStorage.getItem("loginStatus") === "true" // Retrieve login status from local storage
-  );
+function LoginForm({toggle, setToggle}){
 
-  const setLoginStatusAndStore = (status) => {
-    setLoginStatus(status);
-    localStorage.setItem("loginStatus", status); // Store login status in local storage
-  };
+const navigate = useNavigate();
+const [username, setUsername] = useState('');
+const [password, setPassword] = useState('');
+const [formError, setFormError] = useState('');
+const [authenticated, setAuthenticated] = useState(false)
 
-  return [loginStatus, setLoginStatusAndStore];
-}
+const handleSubmit = (event) => {
+  event.preventDefault();
 
-function LoginForm() {
-  const [login, setLogin] = useState(true);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [loginStatus, setLoginStatus] = useLoginStatus();
-  const navigate = useNavigate();
+  // if statement if BOTH username and password was entered.
+  if(!username.trim() || !password.trim()) {
+    // sets the FormError state
+    setFormError('Username and Password are required.');
+  } else{
+    // DEBUG insert code for submitting to database
+    console.log("Username: ", username);
+    console.log("Password: ", password);
 
-  function handleLogin() {
-    fetch("http://127.0.0.1:5000/login", {
-      method: "POST",
+    fetch('http://127.0.0.1:5000/authenticate', {
+      method : 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type' : 'application/json',
       },
-      body: JSON.stringify({ username: username, password: password }),
+      body : JSON.stringify({'username':username, 'password':password}),
     })
-      .then((response) => response.json())
-      .then((response) => {
-        if (response.loggedIn) {
-          setLoginStatus(true); // Update login status
-          setMessage("Login Successful");
-          navigate("/products"); // Navigate after successful login
-        } else {
-          setLoginStatus(false);
-          setMessage("Incorrect username or password");
-        }
-      })
-      .catch((error) => setMessage("Incorrect username or password"));
+    .then(response => response.json())
+    .then(response => {
+      setAuthenticated(response.authenticated);
+      setFormError(response.message);
+      if(response.authenticated){
+        localStorage.setItem('loggedIn', 'true');
+        setUsername('');
+        setPassword('');
+        // setLoggedIn(true);
+        navigate('/products');
+      }else{
+        localStorage.setItem('loggedIn', 'false');
+      }
+    })
+    .catch(error => {
+      alert('Authentication failed. Incorrect username or passsword.');
+      console.log(error);
+    });
   }
+};
 
-  return login ? (
-    <>
-      <div>
-        <p id="message" style={{ color: "red" }}>
-          {message}
-        </p>
-      </div>
-      <div id="loginForm">
-        <label htmlFor="username">Username:</label>
+function onSwitchToSignup(){
+    setToggle(false);
+}
+    
+return (
+    <div>
+        <div>
+        {formError && <div style={{ color: 'red' }}>{formError}</div>}
+        </div>
+
+        <h2>Login</h2>
+
+        <form onSubmit={handleSubmit}>
+        <div>
+        <label htmlFor="username">Username: </label>
         <input
-          type="text"
-          onChange={(e) => setUsername(e.target.value)}
-          id="username"
-          placeholder="Enter your username"
-        ></input>
-        <br />
-        <label htmlFor="password">Password:</label>
+            type="text"
+            id="username"
+            placeHolder='Enter your username'
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+        />
+        </div>
+
+        <div>
+        <label htmlFor="password">Password: </label>
         <input
-          type="password"
-          onChange={(e) => setPassword(e.target.value)}
-          id="password"
-          placeholder="Enter your password"
-        ></input>
-        <br />
-        <button onClick={handleLogin}>Login</button>
-        <br />
-        <button onClick={() => setLogin(!login)}>Switch to Signup</button>
-      </div>
-    </>
-  ) : (
-    <SignupForm />
-  );
+            type="password"
+            id="password"
+            value={password}
+            placeHolder='Enter your password'
+            onChange={(e) => setPassword(e.target.value)}
+        />
+        </div>
+        <button type="submit">Login</button>
+        <br/>
+        <button onClick={onSwitchToSignup}>Switch to Signup</button>
+    </form>
+
+    <button onClick={()=>localStorage.setItem('loggedIn', 'false')}>Logout</button>
+    </div>
+    
+
+    );
 }
 
 export default LoginForm;
