@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Header from './Header';
 import ProductList from './ProductList';
 import Cart from './Cart';
 import Footer from './Footer';
-import axios from 'axios';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 
@@ -34,7 +34,7 @@ const Productpage = () => {
   }, []);
 
   const handleLogin = () => {
-    switchForm();
+    setLoggedIn(true); // Set loggedIn state to true upon successful login
   };
 
   const switchForm = () => {
@@ -44,7 +44,17 @@ const Productpage = () => {
   return (
     <div>
       <Header />
-      {loggedIn ? (
+      {/* Check if user is logged in, if not, show login form */}
+      {!loggedIn ? (
+        <div>
+          {showLoginForm ? (
+            <LoginForm switchToSignup={switchForm} onLogin={handleLogin} />
+          ) : (
+            <SignupForm switchToLogin={switchForm} />
+          )}
+        </div>
+      ) : (
+        // If user is logged in, show product list and cart
         <table>
           <tbody>
             <tr>
@@ -53,14 +63,6 @@ const Productpage = () => {
             </tr>
           </tbody>
         </table>
-      ) : (
-        <div>
-      {showLoginForm ? (
-        <LoginForm switchToSignup={switchForm} onLogin={handleLogin} />
-      ) : (
-        <SignupForm switchToLogin={switchForm} />
-      )}
-      </div>
       )}
       <Footer />
     </div>
