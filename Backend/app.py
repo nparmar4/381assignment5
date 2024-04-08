@@ -86,8 +86,9 @@ def userSignup():
   username = data.get("username")
   password = data.get("password")
   email = data.get("email")
-  if any(user["username"] == username for user in users):
-    return jsonify({'error': 'Username already exists'}), 400
+  for user in users:
+    if (user["username"] == username for user in users):
+      return jsonify({'message': 'Username already exists'}), 400
   users.append({"username": username, "password": password, "email": email})
   return jsonify(data), 201
 

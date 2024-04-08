@@ -28,10 +28,10 @@ const handleSubmit = (event) => {
     event.preventDefault();
     if(!formData.username.trim() || !formData.password.trim() || !formData.confirmPassword.trim() || !formData.email.trim()){
         setFormError('All fields are required!');
-    } else if (formData.password != formData.confirmPassword){
+    } else if (formData.password !== formData.confirmPassword){
         setFormError('Pasword do not match!');
     } else {
-        fetch('http://127.0.0.1:5000/register',{
+        fetch('http://127.0.0.1:5000/signup',{
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
